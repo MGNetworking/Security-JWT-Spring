@@ -35,6 +35,7 @@ public class CompteService implements InterCompteService {
 
     @Override
     public AppRole createRole(AppRole appRole) {
+
         return interAppRoleRepository.save(appRole);
     }
 
@@ -49,11 +50,13 @@ public class CompteService implements InterCompteService {
 
     @Override
     public AppUser loadUserByName(String appUser) {
+
         return interAppUserRepository.findByFirstname(appUser);
     }
 
     @Override
     public List<AppUser> listAllUser() {
+
         return interAppUserRepository.findAll();
     }
 

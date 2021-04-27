@@ -19,7 +19,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        http.csrf().disable();
+        http.csrf().disable();      // desactive pour utilisé l'autentification Statless
         http.headers().frameOptions().disable();
         http.authorizeRequests().anyRequest().permitAll(); // permet a tout les requetes aucun authentification
     }

@@ -1,3 +1,12 @@
+-- Schema for web service produit
+------------------------------------------------------
+DROP SCHEMA IF EXISTS security CASCADE;
+CREATE SCHEMA security
+    AUTHORIZATION postgres;
+
+COMMENT ON SCHEMA security
+    IS 'schema de gestion de la sécuriter';
+
 ------------------------------------------------------
 -- for delete table
 ------------------------------------------------------
@@ -13,7 +22,6 @@ CREATE TABLE security.app_role
     id_Role  serial primary key,
     roleName varchar(30) not null
 );
-
 
 ------------------------------------------------------
 -- user

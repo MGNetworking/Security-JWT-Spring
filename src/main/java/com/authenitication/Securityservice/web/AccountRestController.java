@@ -28,6 +28,7 @@ public class AccountRestController {
      */
     @GetMapping(path = "/allUser")
     public List<AppUser> userList() {
+
         return this.interCompteService.listAllUser();
     }
 
@@ -37,8 +38,9 @@ public class AccountRestController {
      * @param appUser
      * @return AppUser Object
      */
-    @PostMapping(path = "/user")
+    @PostMapping(path = "/createUser")
     public AppUser saveUser(@RequestBody AppUser appUser) {
+
         return this.interCompteService.createUser(appUser);
     }
 
@@ -48,8 +50,9 @@ public class AccountRestController {
      * @param appRole
      * @return AppRole Object
      */
-    @PostMapping(path = "/role")
+    @PostMapping(path = "/createRole")
     public AppRole saveRole(@RequestBody AppRole appRole) {
+
         return this.interCompteService.createRole(appRole);
     }
 
@@ -58,7 +61,7 @@ public class AccountRestController {
      *
      * @param formUserRole
      */
-    @PostMapping(path = "/addRoleUser")
+    @PostMapping(path = "/addUserRole")
     public void addRoleToUser(@RequestBody FormUserRole formUserRole) {
         this.interCompteService.addRoleToUser(formUserRole.getUsername(), formUserRole.getRolename());
     }
