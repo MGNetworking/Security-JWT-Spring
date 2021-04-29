@@ -12,6 +12,7 @@ public class AppRole {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_role")
     private Long id_role;
+
     @Column(name = "rolename")
     private String roleName;
 

@@ -35,7 +35,6 @@ public class CompteService implements InterCompteService {
 
     @Override
     public AppRole createRole(AppRole appRole) {
-
         return interAppRoleRepository.save(appRole);
     }
 

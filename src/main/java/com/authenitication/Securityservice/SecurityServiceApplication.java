@@ -1,6 +1,5 @@
 package com.authenitication.Securityservice;
 
-import com.authenitication.Securityservice.entities.FormUserRole;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +15,7 @@ public class SecurityServiceApplication {
     }
 
     /**
-     * Permet de cryter le mot de passe
+     * Permet le hachage du mot de passe
      *
      * @return BCryptPasswordEncoder Object
      */
