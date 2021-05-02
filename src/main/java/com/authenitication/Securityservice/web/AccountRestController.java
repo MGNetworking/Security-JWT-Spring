@@ -40,7 +40,7 @@ public class AccountRestController {
     }
 
     /**
-     * Recherche de tout les user.
+     * Recherche de tout les user que seul le rôle ADMIN peut avoir accés.
      *
      * @return List<AppUser>
      */
@@ -52,7 +52,7 @@ public class AccountRestController {
     }
 
     /**
-     * Création d'un utilisateur
+     * Création d'un utilisateur.
      *
      * @param appUser
      * @return AppUser Object
@@ -78,7 +78,8 @@ public class AccountRestController {
     }
 
     /**
-     * Ajout d'un role a un utilisateur
+     * Ajout d'un role à un utilisateur. Seul le rôle
+     * ADMIN peux exécuter.
      *
      * @param formUserRole
      */
