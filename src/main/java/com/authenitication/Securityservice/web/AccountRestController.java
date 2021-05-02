@@ -13,6 +13,8 @@ import com.authenitication.Securityservice.service.InterCompteService;
 import com.authenitication.Securityservice.utilitaire.Token;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,11 +40,12 @@ public class AccountRestController {
     }
 
     /**
-     * Recherche de tout les user
+     * Recherche de tout les user.
      *
      * @return List<AppUser>
      */
     @GetMapping(path = "/allUser")
+    @PostAuthorize("hasAuthority('ADMIN')")
     public List<AppUser> userList() {
 
         return this.interCompteService.listAllUser();
@@ -55,18 +58,20 @@ public class AccountRestController {
      * @return AppUser Object
      */
     @PostMapping(path = "/createUser")
+    @PreAuthorize("HasAuthority('ADMIN','USER')")
     public AppUser saveUser(@RequestBody AppUser appUser) {
 
         return this.interCompteService.createUser(appUser);
     }
 
     /**
-     * Création d'un role.
+     * Création d'un role que seul le rôle ADMIN peux créer.
      *
-     * @param appRole
+     * @param appRole type AppRole
      * @return AppRole Object
      */
     @PostMapping(path = "/createRole")
+    @PostAuthorize("hasAuthority('ADMIN')")
     public AppRole saveRole(@RequestBody AppRole appRole) {
 
         return this.interCompteService.createRole(appRole);
@@ -78,6 +83,7 @@ public class AccountRestController {
      * @param formUserRole
      */
     @PostMapping(path = "/addUserRole")
+    @PostAuthorize("hasAuthority('ADMIN')")
     public void addRoleToUser(@RequestBody FormUserRole formUserRole) {
         this.interCompteService.addRoleToUser(formUserRole.getUsername(), formUserRole.getRolename());
     }
