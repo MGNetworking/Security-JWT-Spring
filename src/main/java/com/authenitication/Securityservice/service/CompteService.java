@@ -1,9 +1,10 @@
 package com.authenitication.Securityservice.service;
 
-import com.authenitication.Securityservice.DAO.InterAppRoleRepository;
-import com.authenitication.Securityservice.DAO.InterAppUserRepository;
+import com.authenitication.Securityservice.Repository.InterAppRoleRepository;
+import com.authenitication.Securityservice.Repository.InterAppUserRepository;
 import com.authenitication.Securityservice.entities.AppRole;
 import com.authenitication.Securityservice.entities.AppUser;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class CompteService implements InterCompteService {
 
     private InterAppRoleRepository interAppRoleRepository;
@@ -39,17 +41,18 @@ public class CompteService implements InterCompteService {
     }
 
     @Override
-    public void addRoleToUser( String appUser, String appRole) {
+    public void addRoleToUser(String appUser, String appRole) {
         AppRole role = interAppRoleRepository.findByRoleName(appRole);
         AppUser user = interAppUserRepository.findByFirstname(appUser);
 
-        user.getAppRoles().add(role);   // Ajout un role au User en base de données
+        user.getListeRoles().add(role);   // Ajout un role au User en base de données
 
     }
 
     @Override
     public AppUser loadUserByName(String appUser) {
 
+        log.info("******************** recherche du user en base de données");
         return interAppUserRepository.findByFirstname(appUser);
     }
 

@@ -1,4 +1,4 @@
-package com.authenitication.Securityservice.DAO;
+package com.authenitication.Securityservice.Repository;
 
 import com.authenitication.Securityservice.entities.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
