@@ -43,8 +43,43 @@ public class JwtAutorisationFiltre extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         log.info("**************************************************");
+        log.info("Filtre d'autorisation ");
 
-        if (request.getServletPath().equals("/refreshToken")) {
+        /**
+         * Access-Control-Allow-Origin => Accès contrôle Autorisation Origine
+         * autorisation des demande d'acces de toutes les origines
+         */
+        response.addHeader("Access-Control-Allow-Origin", "*");
+
+        /**
+         *   Access Controle Allow Header => Accès contrôle Autorisation en-tete
+         *   Autorise les demandes qui possedant les en-tete suivant.
+         */
+        response.addHeader("Access-Control-Allow-Headers",
+                "Origin, Accept, X-Requested-With, Content-Type, " +
+                        "Access-Control-Request-Method, " +
+                        "Access-Control-Request-Headers," +
+                        "Authorization");
+
+        /**
+         * Access-Control-Expose-Headers => Accès contrôle Exposition Autorisation
+         * Autorise a envoyer les en-tetes suivant
+         */
+        response.addHeader("Access-Control-Expose-Headers",
+                "Access-Control-Allow-Origin, " +
+                        "Access-Control-Allow-Credentials, " +
+                        "Authorization");
+
+
+        // si requete avec option , pas de token a vérifier
+        if (request.getMethod().equals("OPTIONS")) {
+
+            log.info("Requête avec Option : " + HttpServletResponse.SC_OK);
+            System.out.println("Response OK : " + HttpServletResponse.SC_OK);
+            response.setStatus(HttpServletResponse.SC_OK);
+            log.info("**************************************************");
+
+        } else if (request.getServletPath().equals("/refreshToken")) {
 
             log.info("Requête ne necessitant pas de droits :");
             log.info("Pour la rafraîchissement du token ");

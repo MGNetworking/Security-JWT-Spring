@@ -29,8 +29,7 @@ import java.util.Collection;
 @EnableWebSecurity
 @Slf4j
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-
+    
     @Autowired
     private CompteService compteService;
 
