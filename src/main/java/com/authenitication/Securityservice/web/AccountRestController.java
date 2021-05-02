@@ -8,17 +8,16 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.authenitication.Securityservice.entities.AppRole;
 import com.authenitication.Securityservice.entities.AppUser;
 import com.authenitication.Securityservice.entities.FormUserRole;
-import com.authenitication.Securityservice.security.SecurityConstant;
+import com.authenitication.Securityservice.utilitaire.Constant;
 import com.authenitication.Securityservice.service.InterCompteService;
+import com.authenitication.Securityservice.utilitaire.Token;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import sun.rmi.runtime.NewThreadAction;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -95,22 +94,14 @@ public class AccountRestController {
             throws IOException {
 
         // recupération du token de rafraîchissement
-        String tokenRefrech = request.getHeader(SecurityConstant.AUTHORIZATION);
+        String tokenRefrech = request.getHeader(Constant.AUTHORIZATION);
 
-        if (tokenRefrech != null && tokenRefrech.startsWith(SecurityConstant.bearer)) {
+        if (tokenRefrech != null && tokenRefrech.startsWith(Constant.BEARER)) {
 
             try {
-                // recup du token sans le préfix
-                String jwt = tokenRefrech.substring(SecurityConstant.bearer.length());
-
-                // creation de l'algorithme de cryptage
-                Algorithm algorithm = Algorithm.HMAC256(SecurityConstant.SECRET);
-
-                // creation jwt de verification
-                JWTVerifier jwtVerifier = JWT.require(algorithm).build();
-
-                // verification du token envoyer dans la requête et recupére les claims
-                DecodedJWT decodedJWT = jwtVerifier.verify(jwt);
+                // vérification de la signature du token
+                DecodedJWT decodedJWT = Token.MatchingToken(tokenRefrech,
+                        Algorithm.HMAC256(Constant.SECRET));
 
                 // recuperation de username contenu dans le payload (parti du token)
                 String username = decodedJWT.getSubject();
@@ -123,46 +114,39 @@ public class AccountRestController {
                 // recherche de l'identiter du user
                 AppUser appUser = interCompteService.loadUserByName(username);
 
-                // creation d'un nouveau token d'acces
-                String jwtAccessToken = JWT.create()
-                        .withSubject(appUser.getFirstname())
-                        .withExpiresAt(new Date(System.currentTimeMillis() + 5 * 60 * 1000))
-                        .withIssuer(request.getRequestURL().toString())
-                        .withClaim(SecurityConstant.roles, appUser.getListeRoles()
-                                .stream()
-                                .map(role -> role.getRoleName())
-                                .collect(Collectors.toList()))
-                        .sign(algorithm);
+                // Création du token d'accées
+                String jwtAccessToken = Token.accesToken_Ap(appUser.getFirstname(),
+                        request.getRequestURL().toString(), 5,
+                        appUser.getListeRoles(),
+                        Token.createHMAC256(Constant.SECRET));
 
-                // creation d'un refresh token
-                String jwtRefreshToken = JWT.create()
-                        .withSubject(appUser.getFirstname())
-                        .withExpiresAt(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
-                        .withIssuer(request.getRequestURL().toString())
-                        .sign(algorithm);
+                // Création du refresh token
+                String jwtRefreshToken = Token.refreshToken(username,
+                        request.getRequestURL().toString(), 15,
+                        Token.createHMAC256(Constant.SECRET));
 
                 Map<String, String> id_Token = new HashMap<>();
-                id_Token.put(SecurityConstant.tokenAcces, jwtAccessToken);
-                id_Token.put(SecurityConstant.tokenRefresh, jwtRefreshToken);
+                id_Token.put(Constant.ACCESS_TOKEN, jwtAccessToken);
+                id_Token.put(Constant.REFRESH_TOKEN, jwtRefreshToken);
 
-                response.setContentType(SecurityConstant.ctJson);
+                response.setContentType(Constant.APPLICATION_JSON);
                 new ObjectMapper().writeValue(response.getOutputStream(), id_Token);
 
 
             } catch (JWTVerificationException jwtvf) {
 
-                // echec de la verification du jwt
+                // Échec de la verification du jwt
                 log.error("problème de verification du jwt message : " + jwtvf.getMessage());
                 log.error("problème de verification du jwt cause : " + jwtvf.getCause());
                 log.error("problème de verification du jwt stacktrace : " + jwtvf.getStackTrace());
 
-                response.setHeader(SecurityConstant.error, jwtvf.getMessage());
+                response.setHeader(Constant.ERROR_MESSAGE, jwtvf.getMessage());
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
 
 
-            } catch (Exception ex) { // cas générale
+            } catch (Exception ex) {
 
-                response.setHeader(SecurityConstant.error, ex.getMessage());
+                response.setHeader(Constant.ERROR_MESSAGE, ex.getMessage());
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
 
             }

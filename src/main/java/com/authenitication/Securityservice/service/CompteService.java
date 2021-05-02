@@ -51,8 +51,6 @@ public class CompteService implements InterCompteService {
 
     @Override
     public AppUser loadUserByName(String appUser) {
-
-        log.info("******************** recherche du user en base de données");
         return interAppUserRepository.findByFirstname(appUser);
     }
 

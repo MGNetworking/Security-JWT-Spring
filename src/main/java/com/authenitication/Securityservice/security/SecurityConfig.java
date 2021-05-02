@@ -34,28 +34,37 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private CompteService compteService;
 
+    /**
+     * Methode de configuration qui fait parti du mecanisme de Spring security.
+     * Elle permet la recherche en base de données de l'utilisateur et de ces droits
+     * d'accés au travers de ces ROLES .
+     * <p>
+     * Les ROLES d'un utilisateur données accés au espace accordé par ces ROLES dans le programme.
+     * <p>
+     * Une Fois l'utilisateur et les ROLES trouvés, renvoi a la methode successful Authentication
+     *
+     * @param auth
+     * @throws Exception
+     */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        // cette parti et le mécanisme de recherche en base des données sur l'utilisateur
         auth.userDetailsService(new UserDetailsService() {
             @Override
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-                log.info("********************* loadUserByUsername");
-
-                // recherche en base du User
+                log.info("**************************************************");
+                log.info("Requête de utilisateur qui cherche a s'authentifier");
                 AppUser appUser = compteService.loadUserByName(username);
 
-                // recup des roles du User
+                log.info("Recupération des ROLES de l'utilisateur");
                 Collection<GrantedAuthority> authorities = new ArrayList<>();
                 appUser.getListeRoles().forEach(appRole -> {
 
                     authorities.add(new SimpleGrantedAuthority(appRole.getRoleName()));
 
                 });
-
-                // renvoi le user name , password , et les roles
+                log.info("**************************************************");
                 return new User(appUser.getFirstname(), appUser.getPassword(), authorities);
             }
         });
@@ -63,6 +72,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * Methode permet la configuration de Spring Sécurity. Actuellement paramétré pour être
+     * utilisé sans état (stateless).
+     *
      * @param http
      * @throws Exception
      */
@@ -81,7 +93,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         // Intergration des filtres d'authentification et d'autorisation
         http.addFilter(new JwtAuthentificationFiltre(authenticationManagerBean()));
-        http.addFilterBefore(new JwtAutorisationFiltre() , UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JwtAutorisationFiltre(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean

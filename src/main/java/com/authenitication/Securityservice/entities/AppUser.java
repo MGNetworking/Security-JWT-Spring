@@ -28,7 +28,7 @@ public class AppUser {
     private String password;
     private String email;
 
-    // Chargement des roles dés que le user est chargé
+    // Chargement des ROLES dés que le user est chargé
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "id_user"),

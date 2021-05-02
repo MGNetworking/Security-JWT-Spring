@@ -1,8 +1,7 @@
 package com.authenitication.Securityservice.filtres;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.authenitication.Securityservice.security.SecurityConstant;
+import com.authenitication.Securityservice.utilitaire.Constant;
+import com.authenitication.Securityservice.utilitaire.Token;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,10 +16,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class JwtAuthentificationFiltre extends UsernamePasswordAuthenticationFilter {
@@ -32,29 +29,31 @@ public class JwtAuthentificationFiltre extends UsernamePasswordAuthenticationFil
     }
 
     /**
-     * Déclencher quand l'utilisateur va tenter de s'authentifier
+     * Déclencher par le frameworks Spring Sécurity au moment de l'authentification
+     * d'un utilisateur
      *
-     * @param request
-     * @param response
-     * @return
+     * @param request  HttpServletRequest qui fourni des information
+     *                 de type Http pour servlet
+     * @param response HttpServletResponse qui fourni des information
+     *                 de type Http pour servlet
+     * @return Authentication objet , l'authentification.
      * @throws AuthenticationException
      */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
-                                                HttpServletResponse response) throws AuthenticationException {
+                                                HttpServletResponse response)
+            throws AuthenticationException {
 
-        log.info("********************* attemptAuthentication ");
-
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-
-        log.info("Username : " + username);
-        log.info("Password : " + password);
+        log.info("**************************************************");
+        log.info("Mapping du username et du password de l'utilisateur  ");
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                new UsernamePasswordAuthenticationToken(username, password);
+                new UsernamePasswordAuthenticationToken(
+                        request.getParameter("username"),
+                        request.getParameter("password"));
+        log.info("**************************************************");
 
-        // déclenche l'opération d'authentification
+        // Déclenche l'opération d'authentification
         return authenticationManager.
                 authenticate(usernamePasswordAuthenticationToken);
 
@@ -77,51 +76,35 @@ public class JwtAuthentificationFiltre extends UsernamePasswordAuthenticationFil
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
+                                            Authentication authResult)
+            throws IOException, ServletException {
 
-        log.info("********************* successfulAuthentication");
+        log.info("**************************************************");
+        log.info("Creation de l'ID token ");
 
         User user = (User) authResult.getPrincipal();
 
-        // création d'un algorithme de crytage avec le secret
-        Algorithm algorithm = Algorithm.HMAC256(SecurityConstant.SECRET);
+        // Création du token d'accées
+        String jwtAccessToken = Token.accesToken_Gt(user.getUsername(),
+                request.getRequestURL().toString(), 5,
+                user.getAuthorities(),
+                Token.createHMAC256(Constant.SECRET));
 
-        /**
-         * Creation de l'acces token avec :
-         * le username
-         * le temps de validité du token ( 5 min )
-         * les roles
-         * la signature
-         */
-        String jwtAccessToken = JWT.create()
-                .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1 * 60 * 1000))
-                .withIssuer(request.getRequestURL().toString())
-                .withClaim(SecurityConstant.roles, user.getAuthorities()
-                        .stream()
-                        .map(grantedAuthority -> grantedAuthority.getAuthority())
-                        .collect(Collectors.toList()))
-                .sign(algorithm);
+        // Création du refresh token
+        String jwtRefreshToken = Token.refreshToken(user.getUsername(),
+                request.getRequestURL().toString(), 15,
+                Token.createHMAC256(Constant.SECRET));
 
-        /**
-         * Creation du refresh token avec :
-         * le username
-         * le temps de validité du token ( 15 min )
-         * la signature
-         */
-        String jwtRefreshToken = JWT.create()
-                .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 15 * 60 * 1000))
-                .withIssuer(request.getRequestURL().toString())
-                .sign(algorithm);
-
+        // mapping des token dans Id token
         Map<String, String> id_Token = new HashMap<>();
-        id_Token.put(SecurityConstant.tokenAcces, jwtAccessToken);
-        id_Token.put(SecurityConstant.tokenRefresh, jwtRefreshToken);
+        id_Token.put(Constant.ACCESS_TOKEN, jwtAccessToken);
+        id_Token.put(Constant.REFRESH_TOKEN, jwtRefreshToken);
 
-        // envoi de données au format Json dans l'en téte de la reponse
-        response.setContentType(SecurityConstant.ctJson);
-        // creation au format json de cette reponse
+        log.info("**************************************************");
+
+        // preparation des données dans l'entete au format Json
+        response.setContentType(Constant.APPLICATION_JSON);
+        // envoi de la response mapped au format Json
         new ObjectMapper().writeValue(response.getOutputStream(), id_Token);
 
     }
