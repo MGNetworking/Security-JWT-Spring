@@ -1,11 +1,9 @@
 package com.authenitication.Securityservice.filtres;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.authenitication.Securityservice.utilitaire.Constant;
-import com.authenitication.Securityservice.utilitaire.Token;
+import com.authenitication.Securityservice.utilitaire.Token_HMAC256;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -98,7 +96,7 @@ public class JwtAutorisationFiltre extends OncePerRequestFilter {
                 try {
 
                     // vérification de la signature du token
-                    DecodedJWT decodedJWT = Token.MatchingToken(authorization,
+                    DecodedJWT decodedJWT = Token_HMAC256.MatchingToken(authorization,
                             Algorithm.HMAC256(Constant.SECRET));
 
                     // recuperation du username

@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-public class Token {
+public class Token_HMAC256 {
 
     /**
      * Créer un Algorithm de type HMAC256.
@@ -54,7 +54,6 @@ public class Token {
 
         return jwtAccessToken;
     }
-
     /**
      * Permet la création d'un token d'accès a parti
      * d'une Collection de type AppRole .
@@ -62,7 +61,7 @@ public class Token {
      * @param username  String le nom de l'utilisateur.
      * @param issuer    String de provenance est la requête.
      * @param nbMinutes int le nombre de minute.
-     * @param AppRole   AppRole Collection de role de l'utilisateur.
+     * @param authorityList  AppRole Collection de role de l'utilisateur.
      * @param algorithm Algorithm l'algorithm de cryptage.
      * @return un objet de type String, le token d'accés.
      */

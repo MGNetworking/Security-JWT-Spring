@@ -1,7 +1,5 @@
 package com.authenitication.Securityservice.web;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -10,7 +8,7 @@ import com.authenitication.Securityservice.entities.AppUser;
 import com.authenitication.Securityservice.entities.FormUserRole;
 import com.authenitication.Securityservice.utilitaire.Constant;
 import com.authenitication.Securityservice.service.InterCompteService;
-import com.authenitication.Securityservice.utilitaire.Token;
+import com.authenitication.Securityservice.utilitaire.Token_HMAC256;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -23,11 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -107,7 +103,7 @@ public class AccountRestController {
 
             try {
                 // vérification de la signature du token
-                DecodedJWT decodedJWT = Token.MatchingToken(tokenRefrech,
+                DecodedJWT decodedJWT = Token_HMAC256.MatchingToken(tokenRefrech,
                         Algorithm.HMAC256(Constant.SECRET));
 
                 // recuperation de username contenu dans le payload (parti du token)
@@ -122,15 +118,15 @@ public class AccountRestController {
                 AppUser appUser = interCompteService.loadUserByName(username);
 
                 // Création du token d'accées
-                String jwtAccessToken = Token.accesToken_Ap(appUser.getFirstname(),
+                String jwtAccessToken = Token_HMAC256.accesToken_Ap(appUser.getFirstname(),
                         request.getRequestURL().toString(), 5,
                         appUser.getListeRoles(),
-                        Token.createHMAC256(Constant.SECRET));
+                        Token_HMAC256.createHMAC256(Constant.SECRET));
 
                 // Création du refresh token
-                String jwtRefreshToken = Token.refreshToken(username,
+                String jwtRefreshToken = Token_HMAC256.refreshToken(username,
                         request.getRequestURL().toString(), 15,
-                        Token.createHMAC256(Constant.SECRET));
+                        Token_HMAC256.createHMAC256(Constant.SECRET));
 
                 Map<String, String> id_Token = new HashMap<>();
                 id_Token.put(Constant.ACCESS_TOKEN, jwtAccessToken);

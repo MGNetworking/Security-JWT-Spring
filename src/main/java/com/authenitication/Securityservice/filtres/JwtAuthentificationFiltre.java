@@ -1,7 +1,7 @@
 package com.authenitication.Securityservice.filtres;
 
 import com.authenitication.Securityservice.utilitaire.Constant;
-import com.authenitication.Securityservice.utilitaire.Token;
+import com.authenitication.Securityservice.utilitaire.Token_HMAC256;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -85,15 +85,15 @@ public class JwtAuthentificationFiltre extends UsernamePasswordAuthenticationFil
         User user = (User) authResult.getPrincipal();
 
         // Création du token d'accées
-        String jwtAccessToken = Token.accesToken_Gt(user.getUsername(),
+        String jwtAccessToken = Token_HMAC256.accesToken_Gt(user.getUsername(),
                 request.getRequestURL().toString(), 5,
                 user.getAuthorities(),
-                Token.createHMAC256(Constant.SECRET));
+                Token_HMAC256.createHMAC256(Constant.SECRET));
 
         // Création du refresh token
-        String jwtRefreshToken = Token.refreshToken(user.getUsername(),
+        String jwtRefreshToken = Token_HMAC256.refreshToken(user.getUsername(),
                 request.getRequestURL().toString(), 15,
-                Token.createHMAC256(Constant.SECRET));
+                Token_HMAC256.createHMAC256(Constant.SECRET));
 
         // mapping des token dans Id token
         Map<String, String> id_Token = new HashMap<>();
